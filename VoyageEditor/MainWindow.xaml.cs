@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.ComponentModel;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -21,6 +22,7 @@ namespace VoyageEditor
         {
             InitializeComponent();
             Loaded += OnMainWindowLoaded;
+            Closing += OnMainWindowClosing;
         }
 
         private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -29,16 +31,23 @@ namespace VoyageEditor
             OpenProjectBrowserDialog();
         }
 
+        private void OnMainWindowClosing(object sender, CancelEventArgs e)
+        {
+            Closing -= OnMainWindowClosing;
+            Project.Current?.Unload();
+        }
+
         private void OpenProjectBrowserDialog()
         {
             var projectBrowser = new ProjectBrowserDialog();
-            if(projectBrowser.ShowDialog() == false)
+            if(projectBrowser.ShowDialog() == false || projectBrowser.DataContext == null)
             {
                 Application.Current.Shutdown();
             }
             else
             {
-
+                Project.Current?.Unload();
+                DataContext = projectBrowser.DataContext;
             }
         }
     }
